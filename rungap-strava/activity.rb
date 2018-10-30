@@ -25,7 +25,7 @@ class Activity
 		end
 
 	end
-=
+
 	private
 
 	def build_activity(data)
