@@ -1,7 +1,11 @@
 require 'strava/api/v3'
 require 'json'
 
-# https://yizeng.me/2017/01/11/get-a-strava-api-access-token-with-write-permission/
+# Export Apple Watch workouts into Strava
+# Step 1: Use RunGap to export activities to Dropbox
+# Step 2: Get a Strava API access token and set as 'access_token' environment variable (see https://yizeng.me/2017/01/11/get-a-strava-api-access-token-with-write-permission/)
+# Step 3: Ruby activity.rb
+# Warning: makes no attempt to check if activities have previously been imported
 
 class Activity
 
@@ -50,7 +54,7 @@ end
 
 
 if __FILE__ == $0
-    
+
     Activity.new.create_activities
 
 end
