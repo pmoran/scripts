@@ -5,33 +5,42 @@ require 'json'
 
 class Activity
 
-    EXPORT_DIR = "/tmp/strava_export"
+    EXPORT_DIR = "#{Dir.home}/Dropbox/Apps/RunGap/export"
+    WORKING_DIR = "/tmp/strava_export"
+    SUPPORTED_TYPES = ["Run"]
+    TYPE_MAP = {"Running" => "Run", "Cycling" => "Ride"}
 
     def initialize
         @client = Strava::Api::V3::Client.new(:access_token => ENV["access_token"])
     end
 
     def create_activities
-        Dir.glob("#{EXPORT_DIR}/*.json").each do |f|
+        return unless init
+        Dir.glob("#{WORKING_DIR}/*.json").each do |f|
             data = JSON.parse(File.read(f))
             activity = build_activity(data)
-            if activity
-                puts activity
-                @client.create_an_activity(activity)
-            else
-                puts "Not a running activity"
-            end
+            @client.create_an_activity(activity) if SUPPORTED_TYPES.include? activity[:type]
         end
+    end
 
+    def init      
+        Dir.chdir(EXPORT_DIR) do
+            exported_files = Dir.glob("*.zip")
+            puts "Found #{exported_files.size} exported file(s)"
+            return false if exported_files.size == 0
+            `rm -rf #{WORKING_DIR} && mkdir #{WORKING_DIR}`
+            `unzip -o '*.zip' -d #{WORKING_DIR}`
+        end
+        true
     end
 
     private
 
     def build_activity(data)
-        return nil unless (data["activityType"]["internalName"]) == "Running"
+        activity_type = data["activityType"]["internalName"]
         { name: data["title"], 
                 description: data["description"],
-                type: 'run',
+                type: TYPE_MAP[activity_type],
                 start_date_local: data["startTime"]["time"],
                 elapsed_time: data["elapsedTime"].to_i,
                 distance: data["distance"] }
@@ -41,7 +50,7 @@ end
 
 
 if __FILE__ == $0
-
+    
     Activity.new.create_activities
 
 end
