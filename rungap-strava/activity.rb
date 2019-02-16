@@ -1,9 +1,15 @@
 require 'strava/api/v3'
 require 'json'
+require 'time'
 
 # Export Apple Watch workouts to Strava
 # Step 1: Use RunGap to export activities to Dropbox
 # Step 2: Get a Strava API access token and set as 'access_token' environment variable (see https://yizeng.me/2017/01/11/get-a-strava-api-access-token-with-write-permission/)
+        # http://www.strava.com/oauth/authorize?client_id=<client_id>&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=write
+        # curl -X POST https://www.strava.com/oauth/token \
+        # -F client_id=<client_id> \
+        # -F client_secret=<client secret> \
+        # -F code=<from authorize url redirect above>
 # Step 3: Ruby activity.rb
 # Warning: makes no attempt to check if activities have previously been exported
 
@@ -42,10 +48,11 @@ class Activity
 
     def build_activity(data)
         activity_type = data["activityType"]["internalName"]
+        start_time = Time.parse(data["startTime"]["time"])
         { name: data["title"], 
                 description: data["description"],
                 type: TYPE_MAP[activity_type],
-                start_date_local: data["startTime"]["time"],
+                start_date_local: start_time.localtime.iso8601,
                 elapsed_time: data["elapsedTime"].to_i,
                 distance: data["distance"] }
     end
