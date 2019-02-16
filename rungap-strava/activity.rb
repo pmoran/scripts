@@ -15,7 +15,7 @@ class Activity
     TYPE_MAP = {"Running" => "Run", "Cycling" => "Ride"}
 
     def initialize
-        @client = Strava::Api::V3::Client.new(:access_token => ENV["access_token"])
+        @client = Strava::Api::V3::Client.new(:access_token => ENV["strava_token"])
     end
 
     def create_activities
